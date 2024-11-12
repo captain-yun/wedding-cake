@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
@@ -8,27 +8,47 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function WorksPage() {
   const worksRef = useRef(null);
+  const [portfolioItems, setPortfolioItems] = useState([]);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        ".work-item",
-        { opacity: 0, y: 50 },
-        {
-          opacity: 1,
-          y: 0,
-          stagger: 0.2,
-          scrollTrigger: {
-            trigger: worksRef.current,
-            start: "top 80%",
-            toggleActions: "play none none reverse",
-          },
+    const fetchWorks = async () => {
+      try {
+        const response = await fetch("/api/works");
+        if (!response.ok) {
+          throw new Error("Failed to fetch works");
         }
-      );
-    }, worksRef);
+        const data = await response.json();
+        setPortfolioItems(data);
+      } catch (error) {
+        console.error("Error fetching works:", error);
+      }
+    };
 
-    return () => ctx.revert();
+    fetchWorks();
   }, []);
+
+  useEffect(() => {
+    if (portfolioItems.length > 0) {
+      const ctx = gsap.context(() => {
+        gsap.fromTo(
+          ".work-item",
+          { opacity: 0, y: 50 },
+          {
+            opacity: 1,
+            y: 0,
+            stagger: 0.2,
+            scrollTrigger: {
+              trigger: worksRef.current,
+              start: "top 80%",
+              toggleActions: "play none none reverse",
+            },
+          }
+        );
+      }, worksRef);
+
+      return () => ctx.revert();
+    }
+  }, [portfolioItems]);
 
   return (
     <div className="bg-black text-white" ref={worksRef}>
@@ -69,25 +89,3 @@ export default function WorksPage() {
     </div>
   );
 }
-
-const portfolioItems = [
-  {
-    id: 1,
-    title: "무더위를 끄고 청량함을 켜다",
-    description: "여름 시즌 하이네켄 맥주 옥외광고 캠페인",
-    image: "/project1.jpg",
-    date: "2024. 07",
-    client: "하이네켄",
-    location: "Korea",
-  },
-  {
-    id: 2,
-    title: "K뷰티 옥외광고의 정석",
-    description: "화장품 브랜드 달바 강북, 여의도 옥외광고 캠페인",
-    image: "/project2.jpg",
-    date: "2024. 06",
-    client: "달바",
-    location: "Korea",
-  },
-  // 추가 프로젝트
-];
