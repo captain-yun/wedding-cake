@@ -43,6 +43,7 @@
   
   .ProseMirror p {
     margin: 1em 0;
+    line-height: attr(data-line-height);
   }
   
   .ProseMirror h1 {

@@ -14,37 +14,62 @@ import { CustomImage } from './extensions/image';
 
 // FontSize 확장
 const FontSize = Extension.create({
-  name: 'fontSize',
-  addAttributes() {
-    return {
-      fontSize: {
-        default: null,
-        parseHTML: element => element.style.fontSize,
-        renderHTML: attributes => {
-          if (!attributes.fontSize) return {};
-          return { style: `font-size: ${attributes.fontSize}` };
-        }
-      }
-    };
-  }
-});
+    name: 'fontSize',
+    
+    addCommands() {
+      return {
+        setFontSize: (fontSize) => ({ chain }) => {
+          return chain()
+            .setMark('textStyle', { fontSize })
+            .run();
+        },
+      };
+    },
+  
+    addGlobalAttributes() {
+      return [
+        {
+          types: ['textStyle'],
+          attributes: {
+            fontSize: {
+              default: null,
+              parseHTML: element => element.style.fontSize,
+              renderHTML: attributes => {
+                if (!attributes.fontSize) return {};
+                return { style: `font-size: ${attributes.fontSize}` };
+              },
+            },
+          },
+        },
+      ];
+    },
+  });
 
 // LineHeight 확장
 const LineHeight = Extension.create({
-  name: 'lineHeight',
-  addAttributes() {
-    return {
-      lineHeight: {
-        default: null,
-        parseHTML: element => element.style.lineHeight,
-        renderHTML: attributes => {
-          if (!attributes.lineHeight) return {};
-          return { style: `line-height: ${attributes.lineHeight}` };
-        }
-      }
-    };
-  }
-});
+    name: 'lineHeight',
+    
+    addCommands() {
+      return {
+        setLineHeight: (lineHeight) => ({ commands }) => {
+          return commands.updateAttributes('paragraph', { lineHeight });
+        },
+      };
+    },
+  
+    addAttributes() {
+      return {
+        lineHeight: {
+          default: '1.0',
+          parseHTML: element => element.style.lineHeight,
+          renderHTML: attributes => {
+            if (!attributes.lineHeight) return {};
+            return { style: `line-height: ${attributes.lineHeight}` };
+          },
+        },
+      };
+    },
+  });
 
 const MenuBar = ({ editor }) => {
   if (!editor) return null;
@@ -103,6 +128,13 @@ const MenuBar = ({ editor }) => {
       </button>
 
       <input
+  type="color"
+  onInput={e => editor.chain().focus().setColor(e.target.value).run()}
+  className="w-8 h-8 p-1 border rounded"
+  title="Text color"
+/>
+
+      <input
         type="file"
         id="image-upload"
         className="hidden"
@@ -124,6 +156,26 @@ const MenuBar = ({ editor }) => {
           }
         }}
       />
+
+<button
+  onClick={() => editor.chain().focus().setTextAlign('left').run()}
+  className={`p-2 ${editor.isActive({ textAlign: 'left' }) ? 'bg-gray-200' : ''}`}
+>
+  <i className="fas fa-align-left"></i>
+</button>
+<button
+  onClick={() => editor.chain().focus().setTextAlign('center').run()}
+  className={`p-2 ${editor.isActive({ textAlign: 'center' }) ? 'bg-gray-200' : ''}`}
+>
+  <i className="fas fa-align-center"></i>
+</button>
+<button
+  onClick={() => editor.chain().focus().setTextAlign('right').run()}
+  className={`p-2 ${editor.isActive({ textAlign: 'right' }) ? 'bg-gray-200' : ''}`}
+>
+  <i className="fas fa-align-right"></i>
+</button>  
+
       <button
         onClick={() => document.getElementById('image-upload')?.click()}
         className="p-2"
@@ -140,6 +192,7 @@ export default function WorkEditor({ initialContent = '', onChange, onThumbnailC
       StarterKit.configure({
         image: false,
       }),
+      Color.configure({ types: ['textStyle'] }),
       TextStyle,
       FontSize,
       LineHeight,
