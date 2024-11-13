@@ -1,0 +1,95 @@
+.editor-container {
+  @apply relative border rounded-lg overflow-hidden;
+}
+
+.editor-toolbar {
+  @apply flex items-center space-x-2 p-2 border-b bg-gray-50;
+}
+
+.ProseMirror {
+  padding: 1rem;
+  min-height: 400px;
+  outline: none;
+}
+
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+}
+
+.editor-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  cursor: pointer;
+  position: relative;
+}
+
+.editor-image[data-text-align="left"] {
+  margin-right: auto;
+}
+
+.editor-image[data-text-align="center"] {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.editor-image[data-text-align="right"] {
+  margin-left: auto;
+}
+
+.resize-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background-color: #0066ff;
+  border: 1px solid white;
+}
+
+.resize-handle.top-left { top: -4px; left: -4px; cursor: nw-resize; }
+.resize-handle.top-right { top: -4px; right: -4px; cursor: ne-resize; }
+.resize-handle.bottom-left { bottom: -4px; left: -4px; cursor: sw-resize; }
+.resize-handle.bottom-right { bottom: -4px; right: -4px; cursor: se-resize; }
+
+.image-controls {
+  @apply z-50;
+} 
+
+.editor-image {
+    max-width: 100%;
+    height: auto;
+}
+  
+.editor-image.align-left {
+float: left;
+margin-right: 1em;
+}
+
+.editor-image.align-center {
+display: block;
+margin-left: auto;
+margin-right: auto;
+}
+
+.editor-image.align-right {
+float: right;
+margin-left: 1em;
+}
+
+figure {
+  margin: 0;
+  display: block;
+}
+
+figure[style*="text-align: left"] img {
+  margin-right: auto;
+}
+
+figure[style*="text-align: center"] img {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+figure[style*="text-align: right"] img {
+  margin-left: auto;
+}
