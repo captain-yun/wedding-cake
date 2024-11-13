@@ -1,30 +1,45 @@
-export async function GET() {
-  const portfolioItems = [
-    {
-      id: 1,
-      title: "무더위를 끄고 청량함을 켜다",
-      description: "여름 시즌 하이네켄 맥주 옥외광고 캠페인",
-      image: "https://cdn.imweb.me/thumbnail/20201216/790985fc44784.jpeg",
-      date: "2024. 07",
-      client: "하이네켄",
-      location: "Korea",
-    },
-    {
-      id: 2,
-      title: "K뷰티 옥외광고의 정석",
-      description: "화장품 브랜드 달바 강북, 여의도 옥외광고 캠페인",
-      image:
-        "https://cdn-pro-web-40-6.cdn-nhncommerce.com/dalbapiedmot_godomall_com/data/img/product/detail/39/4_pdt.jpg",
-      date: "2024. 06",
-      client: "달바",
-      location: "Korea",
-    },
-  ];
+import { NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
 
-  return new Response(JSON.stringify(portfolioItems), {
-    status: 200,
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+export async function POST(request) {
+  try {
+    const body = await request.json();
+    
+    console.log('Received data:', body);
+    
+    const work = await prisma.work.create({
+      data: {
+        title: body.title,
+        content: body.content,
+        client: body.client,
+        period: body.period,
+      },
+    });
+    
+    return NextResponse.json(work, { status: 201 });
+  } catch (error) {
+    console.error('Database error:', error);
+    
+    return NextResponse.json(
+      { error: error.message || 'Failed to create work' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET() {
+  try {
+    const works = await prisma.work.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+    
+    return NextResponse.json(works);
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Failed to fetch works' },
+      { status: 500 }
+    );
+  }
 }

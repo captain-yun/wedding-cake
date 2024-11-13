@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import Navigation from "@/components/common/Navigation";
 import Footer from "@/components/common/Footer";
 import "./globals.css";
+import Link from 'next/link';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,6 +18,9 @@ export default function RootLayout({ children }) {
         <Navigation />
         <main className="min-h-screen pt-20">{children}</main>
         <Footer />
+        <Link href="/admin/editor" className="fixed bottom-4 right-4 bg-blue-500 text-white p-2 rounded">
+          관리자 페이지
+        </Link>
       </body>
     </html>
   );
