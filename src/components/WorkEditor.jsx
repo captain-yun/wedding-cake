@@ -146,6 +146,7 @@ export default function WorkEditor({ initialContent = '', onChange, onThumbnailC
       TextAlign.configure({
         types: ['heading', 'paragraph', 'image'],
         defaultAlignment: 'left',
+        alignments: ['left', 'center', 'right'],
       }),
       Underline,
       CustomImage.configure({
@@ -174,20 +175,32 @@ export default function WorkEditor({ initialContent = '', onChange, onThumbnailC
         >
           <div className="flex items-center space-x-2 bg-white shadow-lg rounded-lg p-2 border">
             <button 
-              onClick={() => editor.chain().focus().setTextAlign('left').run()}
-              className={`p-2 ${editor.isActive({ textAlign: 'left' }) ? 'bg-gray-200' : ''}`}
+              onClick={() => {
+                editor.chain().focus().updateAttributes('image', {
+                  textAlign: 'left'
+                }).run();
+              }}
+              className={`p-2 ${editor.isActive('image', { textAlign: 'left' }) ? 'bg-gray-200' : ''}`}
             >
               <i className="fas fa-align-left"></i>
             </button>
             <button 
-              onClick={() => editor.chain().focus().setTextAlign('center').run()}
-              className={`p-2 ${editor.isActive({ textAlign: 'center' }) ? 'bg-gray-200' : ''}`}
+              onClick={() => {
+                editor.chain().focus().updateAttributes('image', {
+                  textAlign: 'center'
+                }).run();
+              }}
+              className={`p-2 ${editor.isActive('image', { textAlign: 'center' }) ? 'bg-gray-200' : ''}`}
             >
               <i className="fas fa-align-center"></i>
             </button>
             <button 
-              onClick={() => editor.chain().focus().setTextAlign('right').run()}
-              className={`p-2 ${editor.isActive({ textAlign: 'right' }) ? 'bg-gray-200' : ''}`}
+              onClick={() => {
+                editor.chain().focus().updateAttributes('image', {
+                  textAlign: 'right'
+                }).run();
+              }}
+              className={`p-2 ${editor.isActive('image', { textAlign: 'right' }) ? 'bg-gray-200' : ''}`}
             >
               <i className="fas fa-align-right"></i>
             </button>

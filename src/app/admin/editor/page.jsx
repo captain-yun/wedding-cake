@@ -9,6 +9,7 @@ export default function AdminEditor() {
   const [client, setClient] = useState('');
   const [period, setPeriod] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [thumbnail, setThumbnail] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,6 +26,7 @@ export default function AdminEditor() {
           content,
           client,
           period,
+          thumbnail,
         }),
       });
 
@@ -88,6 +90,7 @@ export default function AdminEditor() {
           <WorkEditor
             initialContent={content}
             onChange={setContent}
+            onThumbnailChange={setThumbnail}
           />
         </div>
 

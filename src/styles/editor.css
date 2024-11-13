@@ -18,78 +18,70 @@
 }
 
 .editor-image {
-  display: block;
   max-width: 100%;
   height: auto;
-  cursor: pointer;
+  display: block;
+}
+
+.image-container {
   position: relative;
+  display: inline-block;
+  margin: 1em 0;
+  width: fit-content;
 }
 
-.editor-image[data-text-align="left"] {
-  margin-right: auto;
+.image-container[data-align='left'] {
+  float: left;
+  margin-right: 1em;
 }
 
-.editor-image[data-text-align="center"] {
+.image-container[data-align='center'] {
+  display: block;
   margin-left: auto;
   margin-right: auto;
+  float: none;
 }
 
-.editor-image[data-text-align="right"] {
-  margin-left: auto;
+.image-container[data-align='right'] {
+  float: right;
+  margin-left: 1em;
 }
 
 .resize-handle {
   position: absolute;
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   background-color: #0066ff;
-  border: 1px solid white;
+  border: 2px solid white;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.2s;
 }
 
-.resize-handle.top-left { top: -4px; left: -4px; cursor: nw-resize; }
-.resize-handle.top-right { top: -4px; right: -4px; cursor: ne-resize; }
-.resize-handle.bottom-left { bottom: -4px; left: -4px; cursor: sw-resize; }
-.resize-handle.bottom-right { bottom: -4px; right: -4px; cursor: se-resize; }
-
-.image-controls {
-  @apply z-50;
-} 
-
-.editor-image {
-    max-width: 100%;
-    height: auto;
-}
-  
-.editor-image.align-left {
-float: left;
-margin-right: 1em;
+.image-container:hover .resize-handle {
+  opacity: 1;
 }
 
-.editor-image.align-center {
-display: block;
-margin-left: auto;
-margin-right: auto;
+.resize-handle-nw {
+  top: -5px;
+  left: -5px;
+  cursor: nw-resize;
 }
 
-.editor-image.align-right {
-float: right;
-margin-left: 1em;
+.resize-handle-ne {
+  top: -5px;
+  right: -5px;
+  cursor: ne-resize;
 }
 
-figure {
-  margin: 0;
-  display: block;
+.resize-handle-sw {
+  bottom: -5px;
+  left: -5px;
+  cursor: sw-resize;
 }
 
-figure[style*="text-align: left"] img {
-  margin-right: auto;
-}
-
-figure[style*="text-align: center"] img {
-  margin-left: auto;
-  margin-right: auto;
-}
-
-figure[style*="text-align: right"] img {
-  margin-left: auto;
+.resize-handle-se {
+  bottom: -5px;
+  right: -5px;
+  cursor: se-resize;
 }

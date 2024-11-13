@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -18,4 +19,20 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.resizable-image {
+  max-width: 100%;
+  height: auto;
+  cursor: nwse-resize;
+  transition: all 0.1s ease-in-out;
+}
+
+.resizable-image:hover {
+  outline: 2px solid #68cef8;
+}
+
+.resizable-image.is-resizing {
+  outline: 2px solid #68cef8;
+  opacity: 0.7;
 }

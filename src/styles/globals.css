@@ -1,0 +1,75 @@
+/* @import './editor.css'; */
+
+/* 에디터 스타일 */
+.ProseMirror {
+    > * + * {
+      margin-top: 0.75em;
+    }
+    
+    img {
+      max-width: 100%;
+      height: auto;
+      cursor: default;
+      
+      &[data-align='left'] {
+        float: left;
+        margin-right: 1em;
+        margin-bottom: 1em;
+      }
+      
+      &[data-align='center'] {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      
+      &[data-align='right'] {
+        float: right;
+        margin-left: 1em;
+        margin-bottom: 1em;
+      }
+      
+      &.is-resizing {
+        cursor: nwse-resize;
+        opacity: 0.7;
+        outline: 2px solid #68cef8;
+      }
+    }
+  }
+  
+  .ProseMirror:focus {
+    outline: none;
+  }
+  
+  .ProseMirror p {
+    margin: 1em 0;
+  }
+  
+  .ProseMirror h1 {
+    font-size: 2em;
+    font-weight: bold;
+    margin: 1em 0;
+  }
+  
+  .ProseMirror h2 {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin: 1em 0;
+  }
+  
+  .ProseMirror h3 {
+    font-size: 1.17em;
+    font-weight: bold;
+    margin: 1em 0;
+  }
+  
+  .ProseMirror img {
+    max-width: 100%;
+    height: auto;
+    margin: 1em 0;
+    cursor: pointer;
+  }
+  
+  .ProseMirror img.ProseMirror-selectednode {
+    outline: 2px solid #68cef8;
+  }
