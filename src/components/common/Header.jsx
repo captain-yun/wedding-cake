@@ -1,22 +1,24 @@
+import Link from 'next/link';
+
 export default function Header() {
   return (
     <header className="header">
       <div className="logo">
-        <a href="/">Agency Logo</a>
+        <Link href="/">Agency Logo</Link>
       </div>
       <nav>
         <ul>
           <li>
-            <a href="/about">About</a>
+            <Link href="/about">About</Link>
           </li>
           <li>
-            <a href="/pricing">Pricing</a>
+            <Link href="/pricing">Pricing</Link>
           </li>
           <li>
-            <a href="/contact">Contact</a>
+            <Link href="/contact">Contact</Link>
           </li>
           <li>
-            <a href="/careers">Careers</a>
+            <Link href="/careers">Careers</Link>
           </li>
         </ul>
       </nav>
