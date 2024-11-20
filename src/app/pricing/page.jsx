@@ -5,7 +5,103 @@ const ServicePages = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Price Information Page */}
+      <section className="py-20 bg-gradient-to-r from-pink-50 to-purple-50">
+        <div className="container mx-auto px-6">
+          <h1 className="text-4xl font-bold text-center text-gray-800 mb-12">멤버십 안내</h1>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {/* Basic Membership */}
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+              <div className="p-8">
+                <h3 className="text-2xl font-semibold text-gray-800 mb-4">베이직 멤버십</h3>
+                <div className="text-3xl font-bold text-purple-600 mb-6">
+                  180만원
+                  <span className="text-base font-normal text-gray-600">/6개월</span>
+                </div>
+                <ul className="space-y-3">
+                  <li className="flex items-center">
+                    <Check className="w-5 h-5 text-green-500 mr-2" />
+                    <span>전담 매칭 플래너 배정</span>
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="w-5 h-5 text-green-500 mr-2" />
+                    <span>월 2회 맞춤 프로필 추천</span>
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="w-5 h-5 text-green-500 mr-2" />
+                    <span>기본 매칭 서비스</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
 
+            {/* Premium Membership */}
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden transform scale-105 border-2 border-purple-600">
+              <div className="bg-purple-600 text-white text-center py-2">
+                <span className="text-sm font-semibold">MOST POPULAR</span>
+              </div>
+              <div className="p-8">
+                <h3 className="text-2xl font-semibold text-gray-800 mb-4">프리미엄 멤버십</h3>
+                <div className="text-3xl font-bold text-purple-600 mb-6">
+                  280만원
+                  <span className="text-base font-normal text-gray-600">/6개월</span>
+                </div>
+                <ul className="space-y-3">
+                  <li className="flex items-center">
+                    <Check className="w-5 h-5 text-green-500 mr-2" />
+                    <span>전담 시니어 매칭 플래너</span>
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="w-5 h-5 text-green-500 mr-2" />
+                    <span>무제한 프로필 추천</span>
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="w-5 h-5 text-green-500 mr-2" />
+                    <span>데이트 코칭 서비스</span>
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="w-5 h-5 text-green-500 mr-2" />
+                    <span>이미지 컨설팅 1회</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* VIP Membership */}
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+              <div className="p-8">
+                <h3 className="text-2xl font-semibold text-gray-800 mb-4">VIP 멤버십</h3>
+                <div className="text-3xl font-bold text-purple-600 mb-6">
+                  480만원
+                  <span className="text-base font-normal text-gray-600">/1년</span>
+                </div>
+                <ul className="space-y-3">
+                  <li className="flex items-center">
+                    <Check className="w-5 h-5 text-green-500 mr-2" />
+                    <span>전담 팀장급 매칭 플래너</span>
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="w-5 h-5 text-green-500 mr-2" />
+                    <span>프리미엄 회원 우선 매칭</span>
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="w-5 h-5 text-green-500 mr-2" />
+                    <span>데이트 코칭 무제한</span>
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="w-5 h-5 text-green-500 mr-2" />
+                    <span>이미지 컨설팅 3회</span>
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="w-5 h-5 text-green-500 mr-2" />
+                    <span>데이트 장소 예약 대행</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Matching Planner Information Page */}
       <section className="py-20">

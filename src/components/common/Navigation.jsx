@@ -24,21 +24,20 @@ export default function Navigation() {
     >
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center">
-          <Link href="/" className="text-2xl font-bold">
-            AGENCY
+          <Link href="/" className="text-3xl font-bold">
+            <i>WEDDING CAKE</i>
           </Link>
 
           <div className="hidden md:flex space-x-8">
             {[
               { href: "/about", label: "About" },
-              { href: "/works", label: "Works" },
-              { href: "/contact", label: "Contact" },
-              { href: "/careers", label: "Careers" },
+              { href: "/pricing", label: "Pricing" },
+              { href: "/contact", label: "Contact" },              
             ].map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
-                className={`text-sm hover:text-gray-600 transition-colors ${
+                className={`text-lg font-semibold hover:text-gray-600 transition-colors ${
                   pathname === href ? "text-black font-bold" : "text-gray-500"
                 }`}
               >
