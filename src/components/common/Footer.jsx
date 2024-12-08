@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FaInstagram, FaFacebookF, FaYoutube, FaBlog } from "react-icons/fa";
+import { FaInstagram, FaFacebookF, FaYoutube, FaBlog, FaUserShield } from "react-icons/fa"; // FaUserShield 추가
 
 export default function Footer() {
   return (
@@ -37,6 +37,11 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} WEDDING CAKE. All rights reserved.
           </p>
         </div>
+        {/* 관리자 페이지 링크 추가 */}
+          <Link href="/admin/members">
+            <FaUserShield className="text-gray-400 hover:text-white transition-colors text-xs" />
+          </Link>
+
       </div>
     </footer>
   );
