@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,9 +8,77 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Member {
-  id        String   @id @default(cuid())
-  phone     String
-  gender    String
-  createdAt DateTime @default(now())
+model User {
+  id            String    @id @default(cuid())
+  phone         String    @unique
+  gender        String
+  role          String    @default("USER") // USER, ADMIN
+  profile       Profile?
+  sentMatches   Match[]   @relation("Sender")
+  receivedMatches Match[] @relation("Receiver")
+  payments      Payment[]
+  feedbacks     Feedback[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Profile {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id])
+  name          String
+  birthDate     DateTime
+  occupation    String
+  education     String
+  location      String
+  height        Int
+  about         String
+  preferences   String
+  photos        Photo[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Match {
+  id            String    @id @default(cuid())
+  senderId      String    
+  sender        User      @relation("Sender", fields: [senderId], references: [id])
+  receiverId    String
+  receiver      User      @relation("Receiver", fields: [receiverId], references: [id])
+  status        String    // PENDING, ACCEPTED, REJECTED, COMPLETED
+  adminId       String
+  payments      Payment[]
+  feedback      Feedback[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Payment {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  matchId       String
+  match         Match     @relation(fields: [matchId], references: [id])
+  amount        Int
+  status        String    // PENDING, COMPLETED, FAILED
+  createdAt     DateTime  @default(now())
+}
+
+model Feedback {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  matchId       String
+  match         Match     @relation(fields: [matchId], references: [id])
+  rating        Int
+  comment       String
+  createdAt     DateTime  @default(now())
+}
+
+model Photo {
+  id            String    @id @default(cuid())
+  profileId     String
+  profile       Profile   @relation(fields: [profileId], references: [id])
+  url           String
+  createdAt     DateTime  @default(now())
 }
