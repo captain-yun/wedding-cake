@@ -1,157 +1,32 @@
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 export default function SignupPage() {
   const router = useRouter();
-  const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
-    name: '',
-    phone: '',
-    birthdate: '',
-    gender: '',
-  });
+  const supabase = createClientComponentClient();
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    // 카카오 SDK 초기화
-    if (window.Kakao) {
-      const kakao = window.Kakao;
-      if (!kakao.isInitialized()) {
-        kakao.init(process.env.NEXT_PUBLIC_KAKAO_CLIENT_ID);
-      }
-    }
-  }, []);
-
-  const handleKakaoLogin = () => {
-    if (window.Kakao) {
-      const kakao = window.Kakao;
-      
-      kakao.Auth.login({
-        success: function(authObj) {
-          // 로그인 성공시 사용자 정보 요청
-          kakao.API.request({
-            url: '/v2/user/me',
-            success: function(response) {
-              const kakaoAccount = response.kakao_account;
-              
-              // 사용자 정보를 서버에 전송하거나 상태 관리
-              const userData = {
-                email: kakaoAccount.email,
-                name: kakaoAccount.profile.nickname,
-                profileImage: kakaoAccount.profile.profile_image_url,
-                provider: 'kakao',
-                providerId: response.id.toString()
-              };
-
-              // 여기서 회원가입 또는 로그인 처리
-              console.log('카카오 로그인 성공:', userData);
-              router.push('/onboarding');
-            },
-            fail: function(error) {
-              console.error('카카오 사용자 정보 요청 실패:', error);
-            }
-          });
-        },
-        fail: function(error) {
-          console.error('카카오 로그인 실패:', error);
+  const handleKakaoLogin = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'kakao',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
         }
       });
-    }
-  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // 회원가입 로직 구현
-    try {
-      // API 호출 등의 회원가입 처리
-      router.push('/onboarding');
+      if (error) throw error;
+      
     } catch (error) {
-      console.error('회원가입 실패:', error);
-    }
-  };
-
-  const renderStep = () => {
-    switch (step) {
-      case 1:
-        return (
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <button
-                onClick={handleKakaoLogin}
-                className="w-full flex items-center justify-center px-4 py-2 border border-yellow-400 shadow-sm text-sm font-medium rounded-md text-yellow-800 bg-yellow-50 hover:bg-yellow-100"
-              >
-                <img 
-                  src="/kakao-logo.png" 
-                  alt="Kakao" 
-                  className="w-5 h-5 mr-2"
-                />
-                카카오로 시작하기
-              </button>
-            </div>
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">또는</span>
-              </div>
-            </div>
-            <button
-              onClick={() => setStep(2)}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700"
-            >
-              이메일로 회원가입
-            </button>
-          </div>
-        );
-
-      case 2:
-        return (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                이메일
-              </label>
-              <input
-                type="email"
-                id="email"
-                required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                비밀번호
-              </label>
-              <input
-                type="password"
-                id="password"
-                required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700"
-            >
-              가입하기
-            </button>
-          </form>
-        );
-
-      default:
-        return null;
+      console.error('카카오 로그인 에러:', error.message);
+      alert('로그인 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -171,7 +46,26 @@ export default function SignupPage() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          {renderStep()}
+          <button
+            onClick={handleKakaoLogin}
+            disabled={isLoading}
+            className="w-full flex justify-center items-center px-4 py-2 border border-yellow-400 rounded-md shadow-sm text-sm font-medium text-yellow-800 bg-yellow-50 hover:bg-yellow-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? (
+              <span className="flex items-center">
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-yellow-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                처리중...
+              </span>
+            ) : (
+              <>
+                <img src="/kakao-logo.png" alt="Kakao" className="w-5 h-5 mr-2" />
+                카카오로 시작하기
+              </>
+            )}
+          </button>
         </div>
       </div>
     </div>

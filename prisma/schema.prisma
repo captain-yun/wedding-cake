@@ -9,10 +9,12 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  phone         String    @unique
-  gender        String
-  role          String    @default("USER") // USER, ADMIN
+  id            String    @id
+  phone         String?   @unique  // Optional since we'll have social login
+  email         String?   @unique  // For social login
+  provider      String?   // google, naver, kakao, phone
+  gender        String?   // Nullable initially
+  role          String    @default("USER")
   profile       Profile?
   sentMatches   Match[]   @relation("Sender")
   receivedMatches Match[] @relation("Receiver")
