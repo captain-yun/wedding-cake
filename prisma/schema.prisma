@@ -3,84 +3,35 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id            String    @id
-  phone         String?   @unique  // Optional since we'll have social login
-  email         String?   @unique  // For social login
-  provider      String?   // google, naver, kakao, phone
-  gender        String?   // Nullable initially
-  role          String    @default("USER")
-  profile       Profile?
-  sentMatches   Match[]   @relation("Sender")
-  receivedMatches Match[] @relation("Receiver")
-  payments      Payment[]
-  feedbacks     Feedback[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id          String    @id
+  name        String?
+  birthdate   DateTime?
+  gender      String?
+  email       String    @unique
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  profile     Profile?
 }
 
 model Profile {
-  id            String    @id @default(cuid())
-  userId        String    @unique
-  user          User      @relation(fields: [userId], references: [id])
-  name          String
-  birthDate     DateTime
-  occupation    String
-  education     String
-  location      String
-  height        Int
-  about         String
-  preferences   String
-  photos        Photo[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-}
-
-model Match {
-  id            String    @id @default(cuid())
-  senderId      String    
-  sender        User      @relation("Sender", fields: [senderId], references: [id])
-  receiverId    String
-  receiver      User      @relation("Receiver", fields: [receiverId], references: [id])
-  status        String    // PENDING, ACCEPTED, REJECTED, COMPLETED
-  adminId       String
-  payments      Payment[]
-  feedback      Feedback[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-}
-
-model Payment {
-  id            String    @id @default(cuid())
-  userId        String
-  user          User      @relation(fields: [userId], references: [id])
-  matchId       String
-  match         Match     @relation(fields: [matchId], references: [id])
-  amount        Int
-  status        String    // PENDING, COMPLETED, FAILED
-  createdAt     DateTime  @default(now())
-}
-
-model Feedback {
-  id            String    @id @default(cuid())
-  userId        String
-  user          User      @relation(fields: [userId], references: [id])
-  matchId       String
-  match         Match     @relation(fields: [matchId], references: [id])
-  rating        Int
-  comment       String
-  createdAt     DateTime  @default(now())
-}
-
-model Photo {
-  id            String    @id @default(cuid())
-  profileId     String
-  profile       Profile   @relation(fields: [profileId], references: [id])
-  url           String
-  createdAt     DateTime  @default(now())
+  id              String    @id @default(uuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id])
+  location        String?
+  occupation      String?
+  introduction    String?
+  hobbies         String?
+  personality     String?
+  lifestyle       String?
+  avatar_url      String?
+  preferences     Json?
+  status          String    @default("ONBOARDING") // ONBOARDING, PROFILE_COMPLETED, MATCHING, MEETING, COMPLETED
+  onboarding_step Int       @default(1)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 }

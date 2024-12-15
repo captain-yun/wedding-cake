@@ -1,8 +1,11 @@
 import { create } from 'zustand'
 
-export const useUIStore = create((set) => ({
-  isMenuOpen: false,
-  theme: 'light',
-  toggleMenu: () => set((state) => ({ isMenuOpen: !state.isMenuOpen })),
-  setTheme: (theme) => set({ theme })
-})) 
+const useUIStore = create((set) => ({
+  isLoading: false,
+  error: null,
+  setLoading: (loading) => set({ isLoading: loading }),
+  setError: (error) => set({ error }),
+  clearError: () => set({ error: null })
+}))
+
+export default useUIStore; 
