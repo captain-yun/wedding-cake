@@ -8,11 +8,20 @@ import useAuthStore from '@/store/auth';
 import Progress from '@/components/features/onboarding/Progress';
 import BirthdateSelector from '@/components/features/onboarding/BirthdateSelector';
 import GenderSelector from '@/components/features/onboarding/GenderSelector';
-import LocationSelector from '@/components/features/onboarding/LocationSelector';
-import OccupationInput from '@/components/features/onboarding/OccupationInput';
 import EducationSelector from '@/components/features/onboarding/EducationSelector';
 import MarriageStatusSelector from '@/components/features/onboarding/MarriageStatusSelector';
-import PhysicalInfoSelector from '@/components/features/onboarding/PhysicalInfoSelector';
+import LocationSelector from '@/components/features/onboarding/LocationSelector';
+import JobCategorySelector from '@/components/features/onboarding/occupation/JobCategorySelector';
+import BodyTypeSelector from '@/components/features/onboarding/physical/BodyTypeSelector';
+import SmokingSelector from '@/components/features/onboarding/lifestyle/SmokingSelector';
+import DrinkingSelector from '@/components/features/onboarding/lifestyle/DrinkingSelector';
+import ReligionSelector from '@/components/features/onboarding/lifestyle/ReligionSelector';
+import ChildPlanSelector from '@/components/features/onboarding/lifestyle/ChildPlanSelector';
+import MarriagePlanSelector from '@/components/features/onboarding/lifestyle/MarriagePlanSelector';
+import MBTISelector from '@/components/features/onboarding/personality/MBTISelector';
+import HobbySelector from '@/components/features/onboarding/interests/HobbySelector';
+import InterestSelector from '@/components/features/onboarding/interests/InterestSelector';
+import IdealTypeSelector from '@/components/features/onboarding/preferences/IdealTypeSelector';
 
 const STEPS = {
   1: { title: '생년월일', component: BirthdateSelector },
@@ -20,15 +29,24 @@ const STEPS = {
   3: { title: '학력', component: EducationSelector },
   4: { title: '결혼이력', component: MarriageStatusSelector },
   5: { title: '거주지역', component: LocationSelector },
-  6: { title: '직업', component: OccupationInput },
-  7: { title: '신체정보', component: PhysicalInfoSelector },
+  6: { title: '직업', component: JobCategorySelector },
+  7: { title: '신체정보', component: BodyTypeSelector },
+  8: { title: '흡연', component: SmokingSelector },
+  9: { title: '음주', component: DrinkingSelector },
+  10: { title: '종교', component: ReligionSelector },
+  11: { title: '결혼계획', component: MarriagePlanSelector },
+  12: { title: '자녀계획', component: ChildPlanSelector },
+  13: { title: 'MBTI', component: MBTISelector },
+  14: { title: '취미', component: HobbySelector },
+  15: { title: '관심사', component: InterestSelector },
+  16: { title: '이상형', component: IdealTypeSelector }
 };
 
 export default function OnboardingPage() {
   const router = useRouter();
   const supabase = createClientComponentClient();
   const { currentStep, formData, setCurrentStep } = useSignupStore();
-  const { user, updateProfile } = useAuthStore();
+  const { user } = useAuthStore();
 
   useEffect(() => {
     if (!user) {
@@ -36,78 +54,37 @@ export default function OnboardingPage() {
     }
   }, [user, router]);
 
+  const CurrentStepComponent = STEPS[currentStep]?.component;
+
   const handleNext = async () => {
     try {
-      if (!isCurrentStepValid()) {
-        alert('모든 필수 항목을 입력해주세요.');
-        return;
-      }
-
-      // const { error } = await supabase
-      //   .from('profiles')
-      //   .upsert({
-      //     id: user.id,
-      //     ...getProfileData(),
-      //     onboarding_step: currentStep + 1
-      //   });
-
-      // if (error) throw error;ㄴ
-      
       if (currentStep === Object.keys(STEPS).length) {
+        const { error } = await supabase
+          .from('profiles')
+          .upsert({
+            id: user.id,
+            ...formData,
+            onboarding_completed: true
+          });
+
+        if (error) throw error;
         router.push('/dashboard');
       } else {
         setCurrentStep(currentStep + 1);
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('저장 중 오류가 발생했습니다.');
     }
   };
-
-  const isCurrentStepValid = () => {
-    switch (currentStep) {
-      case 1:
-        return formData.birthdate.year && formData.birthdate.month && formData.birthdate.day;
-      case 2:
-        return formData.gender;
-      case 3:
-        return formData.education;
-      case 4:
-        return formData.marriageStatus && 
-          (formData.marriageStatus === 'never_married' || formData.children !== null);
-      case 5:
-        return formData.location;
-      case 6:
-        return formData.occupation;
-      case 7:
-        return formData.height && formData.bodyType;
-      default:
-        return false;
-    }
-  };
-
-  const getProfileData = () => {
-    const { birthdate, ...rest } = formData;
-    if (currentStep === 1) {
-      const { year, month, day } = birthdate;
-      return {
-        ...rest,
-        birthdate: `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
-      };
-    }
-    return rest;
-  };
-
-  const CurrentStepComponent = STEPS[currentStep].component;
 
   if (!user) return null;
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Progress currentStep={currentStep} totalSteps={Object.keys(STEPS).length} />
-      <div className="container mx-auto px-4 py-12 pt-28">
-        <div className="max-w-lg mx-auto bg-white rounded-lg shadow-sm p-6">
-          <CurrentStepComponent />
+      <Progress />
+      <div className="max-w-2xl mx-auto pt-32 pb-12 px-4">
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          {CurrentStepComponent && <CurrentStepComponent />}
           <div className="flex justify-between mt-8">
             <button
               onClick={() => setCurrentStep(currentStep - 1)}

@@ -9,28 +9,34 @@ const useSignupStore = create((set) => ({
       day: ''
     },
     gender: '',
-    location: '',
-    occupation: '',
     education: '',
     marriageStatus: '',
-    children: null,
+    location: {
+      cityId: '',
+      cityName: '',
+      district: ''
+    },
+    occupation: {
+      category: '',
+      detail: ''
+    },
     height: '',
     bodyType: '',
+    smoking: '',
+    drinking: '',
+    religion: '',
+    marriagePlan: '',
+    childPlan: '',
+    mbti: '',
+    hobbies: [],
+    interests: [],
+    idealTypes: [],
   },
   setCurrentStep: (step) => set({ currentStep: step }),
   setFormData: (data) => set((state) => ({
     formData: { ...state.formData, ...data }
   })),
-  setBirthdate: (type, value) => set((state) => ({
-    formData: {
-      ...state.formData,
-      birthdate: {
-        ...state.formData.birthdate,
-        [type]: value
-      }
-    }
-  })),
-  reset: () => set({
+  resetForm: () => set({
     currentStep: 1,
     formData: {
       birthdate: {
@@ -39,13 +45,28 @@ const useSignupStore = create((set) => ({
         day: ''
       },
       gender: '',
-      location: '',
-      occupation: '',
       education: '',
       marriageStatus: '',
-      children: null,
+      location: {
+        cityId: '',
+        cityName: '',
+        district: ''
+      },
+      occupation: {
+        category: '',
+        detail: ''
+      },
       height: '',
       bodyType: '',
+      smoking: '',
+      drinking: '',
+      religion: '',
+      marriagePlan: '',
+      childPlan: '',
+      mbti: '',
+      hobbies: [],
+      interests: [],
+      idealTypes: [],
     }
   })
 }))
