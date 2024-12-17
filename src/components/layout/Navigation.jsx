@@ -61,7 +61,7 @@ export default function Navigation() {
               user ? (
                 <>
                   <Link
-                    href="/onboarding"
+                    href="/status"
                     className="text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium"
                   >
                     진행 현황
@@ -113,7 +113,7 @@ export default function Navigation() {
             user ? (
               <>
                 <Link
-                  href="/onboarding"
+                  href="/status"
                   className="text-gray-700 hover:text-purple-600 block px-3 py-2 rounded-md text-base font-medium"
                   onClick={() => setIsOpen(false)}
                 >

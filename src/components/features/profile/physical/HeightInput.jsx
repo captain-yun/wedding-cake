@@ -3,14 +3,18 @@
 import { useState } from 'react';
 import useSignupStore from '@/store/signup';
 
-export default function HeightInput() {
+export default function HeightInput({ onComplete }) {
   const { formData, setFormData } = useSignupStore();
   const [height, setHeight] = useState(formData.height || '');
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (height >= 140 && height <= 210) {
-      setFormData({ height: parseInt(height) });
+      setFormData({
+        ...formData,
+        height: parseInt(height)
+      });
+      onComplete();
     }
   };
 
@@ -37,6 +41,13 @@ export default function HeightInput() {
             140cm에서 210cm 사이의 값을 입력해주세요
           </p>
         )}
+        <button
+          type="submit"
+          disabled={!height || height < 140 || height > 210}
+          className="w-full py-3 px-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          다음
+        </button>
       </form>
     </div>
   );

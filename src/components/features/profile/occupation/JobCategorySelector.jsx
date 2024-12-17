@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import useSignupStore from '@/store/signup';
 
 const JOB_CATEGORIES = [
@@ -102,22 +102,32 @@ const JOB_CATEGORIES = [
   }
 ];
 
-export default function JobCategorySelector({ onNext }) {
+export default function JobCategorySelector({ onComplete }) {
   const { formData, setFormData } = useSignupStore();
   const [selectedCategory, setSelectedCategory] = useState(null);
+
+  useEffect(() => {
+    if (formData.occupation?.category) {
+      const category = JOB_CATEGORIES.find(cat => cat.name === formData.occupation.category);
+      if (category) {
+        setSelectedCategory(category);
+      }
+    }
+  }, [formData.occupation]);
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
   };
 
   const handleSubCategorySelect = (subCategory) => {
-    setFormData({
+    const newOccupation = {
       occupation: {
         category: selectedCategory.name,
         detail: subCategory
       }
-    });
-    onNext();
+    };
+    setFormData(newOccupation);
+    onComplete();
   };
 
   return (
@@ -132,7 +142,11 @@ export default function JobCategorySelector({ onNext }) {
               <button
                 key={category.id}
                 onClick={() => handleCategorySelect(category)}
-                className="p-4 text-center rounded-lg transition-all bg-white border border-gray-200 hover:border-purple-500"
+                className={`p-4 text-center rounded-lg transition-all border
+                  ${formData.occupation?.category === category.name
+                    ? 'bg-purple-50 border-purple-500'
+                    : 'bg-white border-gray-200 hover:border-purple-500'
+                  }`}
               >
                 {category.name}
               </button>
@@ -157,7 +171,11 @@ export default function JobCategorySelector({ onNext }) {
               <button
                 key={subCategory}
                 onClick={() => handleSubCategorySelect(subCategory)}
-                className="p-4 text-center rounded-lg transition-all bg-white border border-gray-200 hover:border-purple-500"
+                className={`p-4 text-center rounded-lg transition-all border
+                  ${formData.occupation?.detail === subCategory
+                    ? 'bg-purple-50 border-purple-500'
+                    : 'bg-white border-gray-200 hover:border-purple-500'
+                  }`}
               >
                 {subCategory}
               </button>

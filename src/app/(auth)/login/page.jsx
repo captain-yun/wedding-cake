@@ -13,7 +13,7 @@ export default function LoginPage() {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
-        router.push('/onboarding');
+        router.push('/profile');
       }
     });
 
