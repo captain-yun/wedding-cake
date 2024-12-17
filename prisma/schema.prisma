@@ -8,30 +8,113 @@ datasource db {
 }
 
 model User {
-  id          String    @id
-  name        String?
-  birthdate   DateTime?
-  gender      String?
-  email       String    @unique
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  profile     Profile?
+  id                String      @id @default(uuid())
+  email             String      @unique
+  created_at        DateTime    @default(now())
+  updated_at        DateTime    @updatedAt
+  profile           Profile?
+  ideal_type        IdealType?
+  verification      Verification?
+  membership        Membership?
 }
 
 model Profile {
-  id              String    @id @default(uuid())
-  userId          String    @unique
-  user            User      @relation(fields: [userId], references: [id])
-  location        String?
-  occupation      String?
-  introduction    String?
-  hobbies         String?
-  personality     String?
-  lifestyle       String?
-  avatar_url      String?
-  preferences     Json?
-  status          String    @default("ONBOARDING") // ONBOARDING, PROFILE_COMPLETED, MATCHING, MEETING, COMPLETED
-  onboarding_step Int       @default(1)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id                String    @id
+  user              User      @relation(fields: [id], references: [id])
+  name              String
+  gender            String
+  birth_date        DateTime
+  height            Int
+  occupation        String
+  company           String?
+  education         String
+  location          String
+  photos            String[]  // URL 배열
+  about_me          String?
+  profile_completed Boolean   @default(false)
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+}
+
+model IdealType {
+  id                String    @id
+  user              User      @relation(fields: [id], references: [id])
+  age_range         Json      // { min: number, max: number }
+  height_range      Json      // { min: number, max: number }
+  education         String[]
+  locations         String[]
+  occupations       String[]
+  body_types        String[]
+  smoking           Boolean?
+  drinking          Boolean?
+  religion          String?
+  marriage_history  String?
+  children_plan     String?
+  personalities     String[]
+  lifestyle         String?
+  hobbies           String[]
+  date_style        String?
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+}
+
+model Verification {
+  id                String    @id
+  user              User      @relation(fields: [id], references: [id])
+  method            String    // 'email' or 'card'
+  status            String    // 'pending', 'approved', 'rejected'
+  proof_image       String?   // URL for card/badge image
+  verified_at       DateTime?
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+}
+
+model Membership {
+  id                String    @id
+  user              User      @relation(fields: [id], references: [id])
+  type              String    // 'basic', 'premium', etc.
+  status            String    // 'active', 'expired', 'cancelled'
+  start_date        DateTime
+  end_date          DateTime
+  payment_history   Json[]    // Array of payment records
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+}
+
+// 매칭 관련 모델들
+model Match {
+  id                String    @id @default(uuid())
+  user1_id          String
+  user2_id          String
+  status            String    // 'pending', 'accepted', 'rejected'
+  matched_at        DateTime  @default(now())
+  feedback          Feedback?
+}
+
+model Feedback {
+  id                String    @id @default(uuid())
+  match             Match     @relation(fields: [match_id], references: [id])
+  match_id          String    @unique
+  rating            Int
+  comment           String?
+  created_at        DateTime  @default(now())
+}
+
+// 관리자 기능을 위한 모델
+model Admin {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  role              String    // 'admin', 'moderator'
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+}
+
+model AuditLog {
+  id                String    @id @default(uuid())
+  action            String
+  entity_type       String
+  entity_id         String
+  changes           Json
+  performed_by      String
+  created_at        DateTime  @default(now())
 }

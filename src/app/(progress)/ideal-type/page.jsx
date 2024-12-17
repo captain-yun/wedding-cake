@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import useAuthStore from '@/store/auth';
 import useSignupStore from '@/store/signup';
 import IdealTypeProgress from '@/components/common/IdealTypeProgress';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createEnhancedClient } from '@/lib/supabase-client';
 
 // 이상형 선택 컴포넌트들 import
 import AgeRangeSelector from '@/components/features/idealtype/basic/AgeRangeSelector';
@@ -97,19 +97,39 @@ export default function IdealTypePage() {
   };
 
   const handleComplete = async () => {
-    const supabase = createClientComponentClient();
-    
-    // 프로필 업데이트
-    const { error } = await supabase
-      .from('profiles')
-      .update({ ideal_type_completed: true })
-      .eq('id', user.id);
+    try {
+      const supabase = createEnhancedClient();
+      
+      // 자동으로 snake_case로 변환됨
+      const { error: idealTypeError } = await supabase
+        .from('ideal_types')
+        .upsert({
+          id: user.id,
+          ...idealTypeData
+        });
 
-    if (!error) {
-      // auth store 상태 업데이트
-      completeStep(3); // 3단계(이상형 작성) 완료 처리
-      setCurrentStep(4); // 다음 단계(본인인증)로 이동
+      if (idealTypeError) throw idealTypeError;
+      
+      console.log('이상형 데이터 저장 완료');
+    //   const { error: profileError } = await supabase
+    //     .from('profiles')
+    //     .update({ 
+    //       idealTypeCompleted: true,
+    //       updatedAt: new Date().toISOString()
+    //     })
+    //     .eq('id', user.id);
+
+    //   if (profileError) throw profileError;
+
+      completeStep(3);
+      setCurrentStep(4);
+
+      console.log('프로필 업데이트 완료');      
+
       router.push('/verification');
+    } catch (error) {
+      console.error('Error completing ideal type:', error);
+      alert('저장 중 오류가 발생했습니다.');
     }
   };
 
