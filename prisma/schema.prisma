@@ -5,6 +5,8 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+  schemas  = ["auth", "public"]
 }
 
 model User {
@@ -16,11 +18,14 @@ model User {
   ideal_type        IdealType?
   verification      Verification?
   membership        Membership?
+
+  @@schema("auth")
 }
 
 model Profile {
   id                String    @id
-  user              User      @relation(fields: [id], references: [id])
+  userId            String    @unique
+  user              User      @relation(fields: [userId], references: [id])
   name              String
   gender            String
   birth_date        DateTime
@@ -29,7 +34,7 @@ model Profile {
   company           String?
   education         String
   location          String
-  photos            String[]  // URL 배열
+  photos            String[]
   about_me          String?
   profile_completed Boolean   @default(false)
   created_at        DateTime  @default(now())
@@ -38,83 +43,54 @@ model Profile {
 
 model IdealType {
   id                String    @id
-  user              User      @relation(fields: [id], references: [id])
+  userId            String    @unique
+  user              User      @relation(fields: [userId], references: [id])
   age_range         Json      // { min: number, max: number }
   height_range      Json      // { min: number, max: number }
-  education         String[]
-  locations         String[]
-  occupations       String[]
-  body_types        String[]
+  education         String    // String으로 변경
+  locations         String    // String으로 변경
+  occupations       String    // String으로 변경
+  body_types        String    // String으로 변경
   smoking           Boolean?
   drinking          Boolean?
   religion          String?
   marriage_history  String?
   children_plan     String?
-  personalities     String[]
+  personalities     String    // String으로 변경
   lifestyle         String?
-  hobbies           String[]
+  hobbies           String    // String으로 변경
   date_style        String?
-  created_at        DateTime  @default(now())
-  updated_at        DateTime  @updatedAt
-}
-
-model Verification {
-  id                String    @id
-  user              User      @relation(fields: [id], references: [id])
-  method            String    // 'email' or 'card'
-  status            String    // 'pending', 'approved', 'rejected'
-  proof_image       String?   // URL for card/badge image
-  verified_at       DateTime?
   created_at        DateTime  @default(now())
   updated_at        DateTime  @updatedAt
 }
 
 model Membership {
   id                String    @id
-  user              User      @relation(fields: [id], references: [id])
+  userId            String    @unique
+  user              User      @relation(fields: [userId], references: [id])
   type              String    // 'basic', 'premium', etc.
   status            String    // 'active', 'expired', 'cancelled'
   start_date        DateTime
   end_date          DateTime
-  payment_history   Json[]    // Array of payment records
+  payment_history   String    // JSON 형식으로 저장할 수 있도록 String으로 변경
   created_at        DateTime  @default(now())
   updated_at        DateTime  @updatedAt
 }
 
-// 매칭 관련 모델들
-model Match {
-  id                String    @id @default(uuid())
-  user1_id          String
-  user2_id          String
-  status            String    // 'pending', 'accepted', 'rejected'
-  matched_at        DateTime  @default(now())
-  feedback          Feedback?
-}
+model Verification {
+  id              String      @id @default(cuid())
+  userId          String      @unique @map("user_id")
+  type            String      // company_email, company_card, business, freelancer, other
+  email           String?     
+  businessNumber  String?     @map("business_number")
+  description     String?     // @db.Text 제거
+  filePath        String?     @map("file_path")
+  filePaths       String?     @map("file_paths") // String으로 변경
+  status          String      @default("pending") // pending, approved, rejected
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+  
+  user            User        @relation(fields: [userId], references: [id])
 
-model Feedback {
-  id                String    @id @default(uuid())
-  match             Match     @relation(fields: [match_id], references: [id])
-  match_id          String    @unique
-  rating            Int
-  comment           String?
-  created_at        DateTime  @default(now())
-}
-
-// 관리자 기능을 위한 모델
-model Admin {
-  id                String    @id @default(uuid())
-  email             String    @unique
-  role              String    // 'admin', 'moderator'
-  created_at        DateTime  @default(now())
-  updated_at        DateTime  @updatedAt
-}
-
-model AuditLog {
-  id                String    @id @default(uuid())
-  action            String
-  entity_type       String
-  entity_id         String
-  changes           Json
-  performed_by      String
-  created_at        DateTime  @default(now())
+  @@map("verifications")
 }

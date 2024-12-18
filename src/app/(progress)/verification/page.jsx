@@ -4,44 +4,102 @@ import { useState } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import useAuthStore from '@/store/auth';
 import StepGuard from '@/components/common/StepGuard';
+import { Briefcase, IdCard, Building2, Users } from 'lucide-react';
+import CompanyVerification from '@/app/(progress)/verification/components/CompanyVerification';
+import BusinessVerification from '@/app/(progress)/verification/components/BusinessVerification';
+import FreelancerVerification from '@/app/(progress)/verification/components/FreelancerVerification';
+import OtherVerification from '@/app/(progress)/verification/components/OtherVerification'; 
 
 export default function VerificationPage() {
-
   const [method, setMethod] = useState('email');
 
   return (
-    <StepGuard requiredStep={4}>
-      <div className="space-y-6">
+    <StepGuard requiredStep={0}>
+      <div className="space-y-8">
         <div className="text-center">
-          <h2 className="text-2xl font-bold">본인 인증</h2>
-          <p className="text-gray-600 mt-2">
-            인증 방법을 선택해주세요
+          <h2 className="text-3xl font-bold text-gray-900">본인 인증</h2>
+          <p className="text-gray-600 mt-3">
+            해당하는 인증 방법을 선택해주세요
           </p>
         </div>
 
-        <div className="flex gap-4">
+        <div className="grid grid-cols-2 gap-4">
+          {/* 회사 인증 */}
           <button
-            onClick={() => setMethod('email')}
-            className={`flex-1 p-4 border rounded-lg ${method === 'email' ? 'border-purple-500 bg-purple-50' : ''}`}
+            onClick={() => setMethod('company')}
+            className={`flex flex-col items-center p-6 border-2 rounded-xl transition-all
+              ${method === 'company' ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-purple-300'}`}
           >
-            <h3 className="font-medium">회사 이메일 인증</h3>
-            <p className="text-sm text-gray-500">회사 이메일로 인증</p>
+            <div className="bg-purple-100 p-4 rounded-full mb-4">
+              <Building2 className="w-8 h-8 text-purple-600" />
+            </div>
+            <h3 className="font-semibold text-lg mb-2">회사 인증</h3>
+            <p className="text-sm text-gray-500 text-center">
+              회사 이메일 또는<br />사원증/명함으로 인증
+            </p>
           </button>
 
+          {/* 사업자 인증 */}
           <button
-            onClick={() => setMethod('card')}
-            className={`flex-1 p-4 border rounded-lg ${method === 'card' ? 'border-purple-500 bg-purple-50' : ''}`}
+            onClick={() => setMethod('business')}
+            className={`flex flex-col items-center p-6 border-2 rounded-xl transition-all
+              ${method === 'business' ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-purple-300'}`}
           >
-            <h3 className="font-medium">사원증/명함 인증</h3>
-            <p className="text-sm text-gray-500">사원증이나 명함 사진으로 인증</p>
+            <div className="bg-purple-100 p-4 rounded-full mb-4">
+              <Briefcase className="w-8 h-8 text-purple-600" />
+            </div>
+            <h3 className="font-semibold text-lg mb-2">사업자 인증</h3>
+            <p className="text-sm text-gray-500 text-center">
+              사업자등록증으로<br />인증
+            </p>
+          </button>
+
+          {/* 프리랜서 인증 */}
+          <button
+            onClick={() => setMethod('freelancer')}
+            className={`flex flex-col items-center p-6 border-2 rounded-xl transition-all
+              ${method === 'freelancer' ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-purple-300'}`}
+          >
+            <div className="bg-purple-100 p-4 rounded-full mb-4">
+              <IdCard className="w-8 h-8 text-purple-600" />
+            </div>
+            <h3 className="font-semibold text-lg mb-2">프리랜서 인증</h3>
+            <p className="text-sm text-gray-500 text-center">
+              계약서 또는<br />프리랜서 증빙서류로 인증
+            </p>
+          </button>
+
+          {/* 기타 인증 */}
+          <button
+            onClick={() => setMethod('other')}
+            className={`flex flex-col items-center p-6 border-2 rounded-xl transition-all
+              ${method === 'other' ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-purple-300'}`}
+          >
+            <div className="bg-purple-100 p-4 rounded-full mb-4">
+              <Users className="w-8 h-8 text-purple-600" />
+            </div>
+            <h3 className="font-semibold text-lg mb-2">기타 인증</h3>
+            <p className="text-sm text-gray-500 text-center">
+              신분증 및<br />소득증빙 서류로 인증
+            </p>
           </button>
         </div>
 
-        {method === 'email' ? (
-          <EmailVerification />
-        ) : (
-          <CardVerification />
-        )}
+        {/* 선택된 인증 방식에 따른 컴포넌트 렌더링 */}
+        <div className="mt-8">
+          {method === 'company' && (
+            <CompanyVerification />
+          )}
+          {method === 'business' && (
+            <BusinessVerification />
+          )}
+          {method === 'freelancer' && (
+            <FreelancerVerification />
+          )}
+          {method === 'other' && (
+            <OtherVerification />
+          )}
+        </div>
       </div>
     </StepGuard>
   );
@@ -195,5 +253,105 @@ function CardVerification() {
         {isLoading ? '제출 중...' : '인증 요청'}
       </button>
     </form>
+  );
+}
+
+// 휴대폰 인증 컴포넌트
+function PhoneVerification() {
+  const [phone, setPhone] = useState('');
+  const [code, setCode] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const supabase = createClientComponentClient();
+
+  const handlePhoneSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // 휴대폰 인증 요청
+      const { error } = await supabase.auth.signInWithOtp({ phone });
+
+      if (error) throw error;
+
+      alert('인증 코드가 발송되었습니다. 휴대폰을 확인해주세요.');
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCodeSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // 인증 코드 확인
+      const { error } = await supabase.auth.verifyOtp({ phone, token: code });
+
+      if (error) throw error;
+
+      alert('인증이 완료되었습니다.');
+      // 추가적인 상태 업데이트나 리다이렉션을 여기에 추가할 수 있습니다.
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div>
+      <form onSubmit={handlePhoneSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium">
+            휴대폰 번호
+          </label>
+          <input 
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="mt-1 block w-full"
+            required
+          />
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+        </div>
+
+        <button
+          type="submit"
+          disabled={isLoading || !phone}
+          className="w-full py-2 bg-purple-600 text-white rounded-lg"
+        >
+          {isLoading ? '제출 중...' : '인증 요청'}
+        </button>
+      </form>
+
+      <form onSubmit={handleCodeSubmit} className="space-y-4 mt-6">
+        <div>
+          <label className="block text-sm font-medium">
+            인증 코드
+          </label>
+          <input 
+            type="text"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            className="mt-1 block w-full"
+            required
+          />
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+        </div>
+
+        <button
+          type="submit"
+          disabled={isLoading || !code}
+          className="w-full py-2 bg-purple-600 text-white rounded-lg"
+        >
+          {isLoading ? '제출 중...' : '인증 완료'}
+        </button>
+      </form>
+    </div>
   );
 } 
