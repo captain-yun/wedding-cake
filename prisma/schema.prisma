@@ -1,96 +1,133 @@
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
-  schemas  = ["auth", "public"]
 }
 
-model User {
-  id                String      @id @default(uuid())
-  email             String      @unique
-  created_at        DateTime    @default(now())
-  updated_at        DateTime    @updatedAt
-  profile           Profile?
-  ideal_type        IdealType?
-  verification      Verification?
-  membership        Membership?
+// 앱 사용자 정보
+model users {
+  id            String     @id
+  email         String     @unique
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
+  profile       profile?
+  ideal_type    ideal_type?
+  verification  verification?
+  membership    membership?
+  status        String     @default("active") // active, inactive, banned
+  last_login    DateTime?
 
-  @@schema("auth")
 }
 
-model Profile {
-  id                String    @id
-  userId            String    @unique
-  user              User      @relation(fields: [userId], references: [id])
-  name              String
-  gender            String
-  birth_date        DateTime
-  height            Int
-  occupation        String
-  company           String?
-  education         String
-  location          String
-  photos            String[]
-  about_me          String?
-  profile_completed Boolean   @default(false)
-  created_at        DateTime  @default(now())
-  updated_at        DateTime  @updatedAt
-}
+// 사용자 프로필
+model profile {
+  id                 String    @id @default(cuid())
+  user_id            String    @unique
+  user               users     @relation(fields: [user_id], references: [id])
+  name               String
+  gender             String
+  birth_date         DateTime
+  height             Int
+  occupation         String
+  company            String?
+  education          String
+  location           String
+  photos             String[]  // URL 배열
+  about_me           String?   @db.Text
+  profile_completed  Boolean   @default(false)
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
 
-model IdealType {
-  id                String    @id
-  userId            String    @unique
-  user              User      @relation(fields: [userId], references: [id])
-  age_range         Json      // { min: number, max: number }
-  height_range      Json      // { min: number, max: number }
-  education         String    // String으로 변경
-  locations         String    // String으로 변경
-  occupations       String    // String으로 변경
-  body_types        String    // String으로 변경
-  smoking           Boolean?
-  drinking          Boolean?
-  religion          String?
-  marriage_history  String?
-  children_plan     String?
-  personalities     String    // String으로 변경
-  lifestyle         String?
-  hobbies           String    // String으로 변경
-  date_style        String?
-  created_at        DateTime  @default(now())
-  updated_at        DateTime  @updatedAt
-}
-
-model Membership {
-  id                String    @id
-  userId            String    @unique
-  user              User      @relation(fields: [userId], references: [id])
-  type              String    // 'basic', 'premium', etc.
-  status            String    // 'active', 'expired', 'cancelled'
-  start_date        DateTime
-  end_date          DateTime
-  payment_history   String    // JSON 형식으로 저장할 수 있도록 String으로 변경
-  created_at        DateTime  @default(now())
-  updated_at        DateTime  @updatedAt
-}
-
-model Verification {
-  id              String      @id @default(cuid())
-  userId          String      @unique @map("user_id")
-  type            String      // company_email, company_card, business, freelancer, other
-  email           String?     
-  businessNumber  String?     @map("business_number")
-  description     String?     // @db.Text 제거
-  filePath        String?     @map("file_path")
-  filePaths       String?     @map("file_paths") // String으로 변경
-  status          String      @default("pending") // pending, approved, rejected
-  createdAt       DateTime    @default(now()) @map("created_at")
-  updatedAt       DateTime    @updatedAt @map("updated_at")
+  @@index([location])
+  @@index([occupation])
   
-  user            User        @relation(fields: [userId], references: [id])
+}
 
-  @@map("verifications")
+// 이상형 정보
+model ideal_type {
+  id             String    @id @default(cuid())
+  user_id        String    @unique
+  user           users     @relation(fields: [user_id], references: [id])
+  age_range      Json      // { min: number, max: number }
+  height_range   Json      // { min: number, max: number }
+  education      String[]  // 배열로 변경
+  locations      String[]  // 배열로 변경
+  occupations    String[]  // 배열로 변경
+  body_types     String[]  // 배열로 변경
+  smoking        Boolean?
+  drinking       Boolean?
+  religion       String?
+  marriage_history String?
+  children_plan  String?
+  personalities  String[]  // 배열로 변경
+  lifestyle      String?
+  hobbies        String[]  // 배열로 변경
+  date_style     String?
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+
+}
+
+// 멤버십 정보
+model membership {
+  id             String          @id @default(cuid())
+  user_id        String          @unique
+  user           users           @relation(fields: [user_id], references: [id])
+  type           membership_type
+  status         membership_status
+  start_date     DateTime
+  end_date       DateTime
+  payment_history Json[]         // JSON 배열로 변경
+  created_at     DateTime        @default(now())
+  updated_at     DateTime        @updatedAt
+
+}
+
+// 인증 정보
+model verification {
+  id                String             @id @default(cuid())
+  user_id           String             @unique
+  user              users              @relation(fields: [user_id], references: [id])
+  type              verification_type
+  email             String?     
+  business_number   String?
+  description       String?            @db.Text
+  file_path         String?
+  file_paths        String[]           // 배열로 변경
+  status            verification_status @default(PENDING)
+  created_at        DateTime           @default(now())
+  updated_at        DateTime           @updatedAt
+
+}
+
+// Enum 타입 정의
+enum membership_type {
+  BASIC
+  PREMIUM
+  VIP
+}
+
+enum membership_status {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum verification_type {
+  COMPANY_EMAIL
+  COMPANY_CARD
+  BUSINESS
+  FREELANCER
+  OTHER
+}
+
+enum verification_status {
+  PENDING
+  APPROVED
+  REJECTED
 }

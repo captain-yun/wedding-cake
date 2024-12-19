@@ -44,7 +44,7 @@ export default function CompanyVerification() {
       if (error) throw error;
 
       // DB에 인증 시도 기록
-      await supabase.from('verifications').insert({
+      await supabase.from('verification').insert({
         user_id: user.id,
         type: 'company_email',
         email: email,
@@ -89,7 +89,7 @@ export default function CompanyVerification() {
 
       // 프로필 업데이트
       const { error: profileError } = await supabase
-        .from('profiles')
+        .from('profile')
         .update({ 
           verification_completed: true,
           updated_at: new Date().toISOString()
