@@ -21,36 +21,71 @@ export default function CompanyVerification() {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-
+  
     try {
-      // 회사 이메일 도메인 검증
       const emailDomain = email.split('@')[1];
-    //   const personalDomains = ['gmail.com', 'naver.com', 'hanmail.net', 'daum.net', 'hotmail.com', 'yahoo.com'];
-    //   if (personalDomains.includes(emailDomain)) {
-    //     throw new Error('회사 이메일 주소를 입력해주세요.');
-    //   }
 
-      // OTP 이메일 발송
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-          data: {
-            verification_type: 'company_email'
-          }
-        }
+      // 기존 인증 정보 확인
+      const { data: existingVerification } = await supabase
+        .from('verification')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('type', 'COMPANY_EMAIL')
+        .eq('email', email)
+        .eq('status', 'PENDING')
+        .single();
+
+      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = new Date(Date.now() + parseInt(process.env.NEXT_PUBLIC_VERIFICATION_CODE_EXPIRE_MINUTES) * 60 * 1000);
+
+      if (existingVerification) {
+        // 기존 인증 정보 업데이트
+        const { error: updateError } = await supabase
+          .from('verification')
+          .update({
+            verification_code: verificationCode,
+            expires_at: expiresAt.toISOString(),
+            attempts: 0,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', user.id)
+          .eq('type', 'COMPANY_EMAIL')
+          .eq('email', email)
+          .eq('status', 'PENDING');
+
+        if (updateError) throw updateError;
+      } else {
+        // 새로운 인증 정보 생성
+        const { error: insertError } = await supabase
+          .from('verification')
+          .insert({
+            user_id: user.id,
+            type: 'COMPANY_EMAIL',
+            email: email,
+            status: 'PENDING',
+            verification_code: verificationCode,
+            expires_at: expiresAt.toISOString(),
+            attempts: 0
+          });
+
+        if (insertError) throw insertError;
+      }
+
+      // 이메일 발송 API 호출
+      const response = await fetch('/api/send-verification-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          code: verificationCode
+        })
       });
-
-      if (error) throw error;
-
-      // DB에 인증 시도 기록
-      await supabase.from('verification').insert({
-        user_id: user.id,
-        type: 'company_email',
-        email: email,
-        status: 'pending'
-      });
-
+  
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || '이메일 발송에 실패했습니다.');
+      }
+  
       setShowOtpInput(true);
       alert('인증번호가 이메일로 발송되었습니다.');
     } catch (error) {
@@ -59,45 +94,60 @@ export default function CompanyVerification() {
       setIsLoading(false);
     }
   };
-
+  
   const handleOtpSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-
+  
     try {
-      // OTP 검증
-      const { error } = await supabase.auth.verifyOtp({
-        email,
-        token: otp,
-        type: 'email'
-      });
-
+      // DB에서 인증 정보 확인
+      const { data, error } = await supabase
+        .from('verification')
+        .select('verification_code, expires_at, attempts')
+        .eq('user_id', user.id)
+        .eq('type', 'COMPANY_EMAIL')
+        .eq('status', 'PENDING')
+        .single();
+  
       if (error) throw error;
-
-      // 인증 상태 업데이트
+      if (!data) throw new Error('인증 정보를 찾을 수 없습니다.');
+  
+      // 만료 시간 확인
+      if (new Date(data.expires_at) < new Date()) {
+        throw new Error('인증 코드가 만료되었습니다. 다시 요청해주세요.');
+      }
+  
+      // 시도 횟수 확인 (5회 제한)
+      if (data.attempts >= 5) {
+        throw new Error('인증 시도 횟수를 초과했습니다. 다시 요청해주세요.');
+      }
+  
+      // 시도 횟수 증가
+      await supabase
+        .from('verification')
+        .update({ attempts: data.attempts + 1 })
+        .eq('user_id', user.id)
+        .eq('type', 'COMPANY_EMAIL')
+        .eq('status', 'PENDING');
+  
+      // 인증 코드 확인
+      if (data.verification_code !== otp) {
+        throw new Error('인증번호가 일치하지 않습니다.');
+      }
+  
+      // 인증 성공 시 상태 업데이트
       const { error: updateError } = await supabase
-        .from('verifications')
+        .from('verification')
         .update({ 
-          status: 'approved',
+          status: 'APPROVED',
           updated_at: new Date().toISOString()
         })
         .eq('user_id', user.id)
-        .eq('type', 'company_email');
-
+        .eq('type', 'COMPANY_EMAIL');
+  
       if (updateError) throw updateError;
-
-      // 프로필 업데이트
-      const { error: profileError } = await supabase
-        .from('profile')
-        .update({ 
-          verification_completed: true,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', user.id);
-
-      if (profileError) throw profileError;
-
+  
       alert('이메일 인증이 완료되었습니다.');
       completeStep(4);
       setCurrentStep(5);

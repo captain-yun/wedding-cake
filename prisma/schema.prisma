@@ -1,111 +1,103 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["multiSchema"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
-// 앱 사용자 정보
 model users {
-  id            String     @id
-  email         String     @unique
-  created_at    DateTime   @default(now())
-  updated_at    DateTime   @updatedAt
-  profile       profile?
-  ideal_type    ideal_type?
-  verification  verification?
-  membership    membership?
-  status        String     @default("active") // active, inactive, banned
-  last_login    DateTime?
-
+  id           String        @id
+  email        String        @unique
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
+  status       String        @default("active")
+  last_login   DateTime?
+  ideal_type   ideal_type?
+  membership   membership?
+  profile      profile?
+  verification verification?
 }
 
-// 사용자 프로필
 model profile {
-  id                 String    @id @default(cuid())
-  user_id            String    @unique
-  user               users     @relation(fields: [user_id], references: [id])
-  name               String
-  gender             String
-  birth_date         DateTime
-  height             Int
-  occupation         String
-  company            String?
-  education          String
-  location           String
-  photos             String[]  // URL 배열
-  about_me           String?   @db.Text
-  profile_completed  Boolean   @default(false)
-  created_at         DateTime  @default(now())
-  updated_at         DateTime  @updatedAt
+  id                String   @id @default(cuid())
+  user_id           String   @unique
+  name              String
+  gender            String
+  birth_date        DateTime
+  height            Int
+  occupation        String
+  company           String?
+  education         String
+  location          String
+  photos            String[]
+  about_me          String?
+  profile_completed Boolean  @default(false)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+  user              users    @relation(fields: [user_id], references: [id])
 
   @@index([location])
   @@index([occupation])
-  
 }
 
-// 이상형 정보
 model ideal_type {
-  id             String    @id @default(cuid())
-  user_id        String    @unique
-  user           users     @relation(fields: [user_id], references: [id])
-  age_range      Json      // { min: number, max: number }
-  height_range   Json      // { min: number, max: number }
-  education      String[]  // 배열로 변경
-  locations      String[]  // 배열로 변경
-  occupations    String[]  // 배열로 변경
-  body_types     String[]  // 배열로 변경
-  smoking        Boolean?
-  drinking       Boolean?
-  religion       String?
+  id               String   @id @default(cuid())
+  user_id          String   @unique
+  age_range        Json
+  height_range     Json
+  education        String[]
+  locations        String[]
+  occupations      String[]
+  body_types       String[]
+  smoking          Boolean?
+  drinking         Boolean?
+  religion         String?
   marriage_history String?
-  children_plan  String?
-  personalities  String[]  // 배열로 변경
-  lifestyle      String?
-  hobbies        String[]  // 배열로 변경
-  date_style     String?
-  created_at     DateTime  @default(now())
-  updated_at     DateTime  @updatedAt
-
+  children_plan    String?
+  personalities    String[]
+  lifestyle        String?
+  hobbies          String[]
+  date_style       String?
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+  user             users    @relation(fields: [user_id], references: [id])
 }
 
-// 멤버십 정보
 model membership {
-  id             String          @id @default(cuid())
-  user_id        String          @unique
-  user           users           @relation(fields: [user_id], references: [id])
-  type           membership_type
-  status         membership_status
-  start_date     DateTime
-  end_date       DateTime
-  payment_history Json[]         // JSON 배열로 변경
-  created_at     DateTime        @default(now())
-  updated_at     DateTime        @updatedAt
-
+  id              String            @id @default(cuid())
+  user_id         String            @unique
+  type            membership_type
+  status          membership_status
+  start_date      DateTime
+  end_date        DateTime
+  payment_history Json[]
+  created_at      DateTime          @default(now())
+  updated_at      DateTime          @updatedAt
+  user            users             @relation(fields: [user_id], references: [id])
 }
 
-// 인증 정보
 model verification {
-  id                String             @id @default(cuid())
-  user_id           String             @unique
-  user              users              @relation(fields: [user_id], references: [id])
-  type              verification_type
-  email             String?     
-  business_number   String?
-  description       String?            @db.Text
-  file_path         String?
-  file_paths        String[]           // 배열로 변경
-  status            verification_status @default(PENDING)
-  created_at        DateTime           @default(now())
-  updated_at        DateTime           @updatedAt
-
+  id              String              @id @default(cuid())
+  user_id         String              @unique
+  type            verification_type
+  email           String?
+  business_number String?
+  description     String?
+  file_path       String?
+  file_paths      String[]
+  verification_code String? 
+  expires_at       DateTime?
+  attempts         Int       @default(0)
+  status          verification_status @default(PENDING)
+  created_at      DateTime            @default(now())
+  updated_at      DateTime            @updatedAt
+  user            users               @relation(fields: [user_id], references: [id])
 }
 
-// Enum 타입 정의
 enum membership_type {
   BASIC
   PREMIUM
