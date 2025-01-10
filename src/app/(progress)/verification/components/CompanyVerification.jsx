@@ -71,7 +71,7 @@ export default function CompanyVerification() {
         if (insertError) throw insertError;
       }
 
-      // 이메일 발송 API 호출
+      // 이메일 ��송 API 호출
       const response = await fetch('/api/send-verification-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -101,53 +101,23 @@ export default function CompanyVerification() {
     setError(null);
   
     try {
-      // DB에서 인증 정보 확인
-      const { data, error } = await supabase
-        .from('verification')
-        .select('verification_code, expires_at, attempts')
-        .eq('user_id', user.id)
-        .eq('type', 'COMPANY_EMAIL')
-        .eq('status', 'PENDING')
-        .single();
-  
-      if (error) throw error;
-      if (!data) throw new Error('인증 정보를 찾을 수 없습니다.');
-  
-      // 만료 시간 확인
-      if (new Date(data.expires_at) < new Date()) {
-        throw new Error('인증 코드가 만료되었습니다. 다시 요청해주세요.');
-      }
-  
-      // 시도 횟수 확인 (5회 제한)
-      if (data.attempts >= 5) {
-        throw new Error('인증 시도 횟수를 초과했습니다. 다시 요청해주세요.');
-      }
-  
-      // 시도 횟수 증가
-      await supabase
-        .from('verification')
-        .update({ attempts: data.attempts + 1 })
-        .eq('user_id', user.id)
-        .eq('type', 'COMPANY_EMAIL')
-        .eq('status', 'PENDING');
-  
-      // 인증 코드 확인
-      if (data.verification_code !== otp) {
-        throw new Error('인증번호가 일치하지 않습니다.');
-      }
-  
-      // 인증 성공 시 상태 업데이트
-      const { error: updateError } = await supabase
-        .from('verification')
-        .update({ 
-          status: 'APPROVED',
-          updated_at: new Date().toISOString()
+      // verify-code API 호출
+      const response = await fetch('/api/verify-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          code: otp
         })
-        .eq('user_id', user.id)
-        .eq('type', 'COMPANY_EMAIL');
+      });
+
+      const data = await response.json();
   
-      if (updateError) throw updateError;
+      if (!response.ok) {
+        throw new Error(data.error || '인증에 실패했습니다.');
+      }
   
+      // 인증 성공
       alert('이메일 인증이 완료되었습니다.');
       completeStep(4);
       setCurrentStep(5);

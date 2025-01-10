@@ -1,64 +1,3 @@
-/*
-  Warnings:
-
-  - You are about to drop the `IdealType` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Membership` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Profile` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Users` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `verifications` table. If the table is not empty, all the data it contains will be lost.
-
-*/
--- CreateEnum
-CREATE TYPE "membership_type" AS ENUM ('BASIC', 'PREMIUM', 'VIP');
-
--- CreateEnum
-CREATE TYPE "membership_status" AS ENUM ('ACTIVE', 'EXPIRED', 'CANCELLED');
-
--- CreateEnum
-CREATE TYPE "verification_type" AS ENUM ('COMPANY_EMAIL', 'COMPANY_CARD', 'BUSINESS', 'FREELANCER', 'OTHER');
-
--- CreateEnum
-CREATE TYPE "verification_status" AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
-
--- DropForeignKey
-ALTER TABLE "public"."IdealType" DROP CONSTRAINT "IdealType_userId_fkey";
-
--- DropForeignKey
-ALTER TABLE "public"."Membership" DROP CONSTRAINT "Membership_userId_fkey";
-
--- DropForeignKey
-ALTER TABLE "public"."Profile" DROP CONSTRAINT "Profile_userId_fkey";
-
--- DropForeignKey
-ALTER TABLE "public"."verifications" DROP CONSTRAINT "verifications_userId_fkey";
-
--- DropTable
-DROP TABLE "public"."IdealType";
-
--- DropTable
-DROP TABLE "public"."Membership";
-
--- DropTable
-DROP TABLE "public"."Profile";
-
--- DropTable
-DROP TABLE "public"."Users";
-
--- DropTable
-DROP TABLE "public"."verifications";
-
--- DropEnum
-DROP TYPE "public"."MembershipStatus";
-
--- DropEnum
-DROP TYPE "public"."MembershipType";
-
--- DropEnum
-DROP TYPE "public"."VerificationStatus";
-
--- DropEnum
-DROP TYPE "public"."VerificationType";
-
 -- CreateTable
 CREATE TABLE "users" (
     "id" TEXT NOT NULL,
@@ -121,8 +60,8 @@ CREATE TABLE "ideal_type" (
 CREATE TABLE "membership" (
     "id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
-    "type" "membership_type" NOT NULL,
-    "status" "membership_status" NOT NULL,
+    "type" TEXT,
+    "status" TEXT,
     "start_date" TIMESTAMP(3) NOT NULL,
     "end_date" TIMESTAMP(3) NOT NULL,
     "payment_history" JSONB[],
@@ -136,13 +75,16 @@ CREATE TABLE "membership" (
 CREATE TABLE "verification" (
     "id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
-    "type" "verification_type" NOT NULL,
+    "type" TEXT,
     "email" TEXT,
     "business_number" TEXT,
     "description" TEXT,
     "file_path" TEXT,
     "file_paths" TEXT[],
-    "status" "verification_status" NOT NULL DEFAULT 'PENDING',
+    "verification_code" TEXT,
+    "expires_at" TIMESTAMP(3),
+    "attempts" INTEGER NOT NULL DEFAULT 0,
+    "status" TEXT DEFAULT 'PENDING',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 

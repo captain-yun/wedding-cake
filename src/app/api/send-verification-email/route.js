@@ -7,7 +7,7 @@ import { cookies } from 'next/headers';
 const mailgun = new Mailgun(formData);
 const mg = mailgun.client({
   username: 'api',
-  key: process.env.MAILGUN_API_KEY || "0920befd-85f3aeed",
+  key: process.env.MAILGUN_API_KEY || '',
 });
 
 const getEmailTemplate = (code) => `
@@ -50,42 +50,78 @@ const getEmailTemplate = (code) => `
 
 export async function POST(request) {
   try {
-    // cookies를 async/await로 처리    
     const cookieStore = cookies();
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+    const supabase = createRouteHandlerClient({ 
+      cookies: async () => cookieStore 
+    });
 
-     const { email, code } = await request.json();
+    const { email, code } = await request.json();
 
-     // Rate limiting: 동일 이메일로 3분에 1번만 요청 가능
-    const threeMinutesAgo = new Date(Date.now() - 3 * 60 * 1000);
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
     const { data: recentAttempt } = await supabase
       .from('verification')
-      .select('created_at')
+      .select('*')
       .eq('email', email)
-      .gt('created_at', threeMinutesAgo.toISOString())
+      .gt('created_at', tenMinutesAgo.toISOString())
       .single();
 
-      console.log(recentAttempt);
-
-     if (recentAttempt) {
+    if (recentAttempt && recentAttempt.attempts >= 5) {
       return NextResponse.json(
-        { error: '3분 후에 다시 시도해주세요.' },
+        { error: '인증 시도 횟수를 초과했습니다. 잠시 후 다시 시도해주세요.' },
         { status: 429 }
       );
     }
-     // 이메일 발송
+
     const emailData = {
-      from: process.env.MAILGUN_FROM || 'noreply@yourdomain.com',
+      from: process.env.MAILGUN_FROM,
       to: email,
       subject: '[웨딩케이크] 회사 이메일 인증',
       html: getEmailTemplate(code)
     };
-     await mg.messages.create(process.env.MAILGUN_DOMAIN || '', emailData);
-     return NextResponse.json({ success: true });
+
+    if (!process.env.MAILGUN_DOMAIN) {
+      throw new Error('MAILGUN_DOMAIN is not configured');
+    }
+
+    await mg.messages.create(process.env.MAILGUN_DOMAIN, emailData);
+    
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+    
+    const expiresAtStr = expiresAt.toISOString().replace('Z', '');
+    
+    console.log('Expiration time set:', {
+      created: new Date().toISOString(),
+      expires: expiresAtStr
+    });
+
+    if (recentAttempt) {
+      await supabase
+        .from('verification')
+        .update({
+          verification_code: code,
+          expires_at: expiresAtStr,
+          attempts: (recentAttempt.attempts || 0) + 1,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', recentAttempt.id);
+    } else {
+      await supabase
+        .from('verification')
+        .insert({
+          type: 'COMPANY_EMAIL',
+          email: email,
+          verification_code: code,
+          expires_at: expiresAtStr,
+          attempts: 1,
+          status: 'PENDING'
+        });
+    }
+
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Email sending error:', error);
     
-    // 더 자세한 에러 메시지 반환
     return NextResponse.json(
       { 
         error: '이메일 발송에 실패했습니다.',

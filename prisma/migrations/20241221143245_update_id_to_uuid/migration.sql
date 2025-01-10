@@ -8,18 +8,6 @@
   - You are about to drop the `verification` table. If the table is not empty, all the data it contains will be lost.
 
 */
--- CreateEnum
-CREATE TYPE "membership_type" AS ENUM ('BASIC', 'PREMIUM', 'VIP');
-
--- CreateEnum
-CREATE TYPE "membership_status" AS ENUM ('ACTIVE', 'EXPIRED', 'CANCELLED');
-
--- CreateEnum
-CREATE TYPE "verification_type" AS ENUM ('COMPANY_EMAIL', 'COMPANY_CARD', 'BUSINESS', 'FREELANCER', 'OTHER');
-
--- CreateEnum
-CREATE TYPE "verification_status" AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
-
 -- DropForeignKey
 ALTER TABLE "public"."ideal_type" DROP CONSTRAINT "ideal_type_user_id_fkey";
 
@@ -46,18 +34,6 @@ DROP TABLE "public"."users";
 
 -- DropTable
 DROP TABLE "public"."verification";
-
--- DropEnum
-DROP TYPE "public"."membership_status";
-
--- DropEnum
-DROP TYPE "public"."membership_type";
-
--- DropEnum
-DROP TYPE "public"."verification_status";
-
--- DropEnum
-DROP TYPE "public"."verification_type";
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -121,8 +97,8 @@ CREATE TABLE "ideal_type" (
 CREATE TABLE "membership" (
     "id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
-    "type" "membership_type" NOT NULL,
-    "status" "membership_status" NOT NULL,
+    "type" TEXT,
+    "status" TEXT,
     "start_date" TIMESTAMP(3) NOT NULL,
     "end_date" TIMESTAMP(3) NOT NULL,
     "payment_history" JSONB[],
@@ -136,16 +112,16 @@ CREATE TABLE "membership" (
 CREATE TABLE "verification" (
     "id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
-    "type" "verification_type" NOT NULL,
+    "type" TEXT,
     "email" TEXT,
     "business_number" TEXT,
     "description" TEXT,
+    "file_path" TEXT,
+    "file_paths" TEXT[],
     "verification_code" TEXT,
     "expires_at" TIMESTAMP(3),
     "attempts" INTEGER NOT NULL DEFAULT 0,
-    "file_path" TEXT,
-    "file_paths" TEXT[],
-    "status" "verification_status" NOT NULL DEFAULT 'PENDING',
+    "status" TEXT DEFAULT 'PENDING',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 

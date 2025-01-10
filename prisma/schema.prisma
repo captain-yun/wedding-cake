@@ -10,7 +10,7 @@ datasource db {
 }
 
 model users {
-  id           String        @id
+  id           String        @id @default(uuid())
   email        String        @unique
   created_at   DateTime      @default(now())
   updated_at   DateTime      @updatedAt
@@ -23,7 +23,7 @@ model users {
 }
 
 model profile {
-  id                String   @id @default(cuid())
+  id                String   @id @default(uuid())
   user_id           String   @unique
   name              String
   gender            String
@@ -45,7 +45,7 @@ model profile {
 }
 
 model ideal_type {
-  id               String   @id @default(cuid())
+  id               String   @id @default(uuid())
   user_id          String   @unique
   age_range        Json
   height_range     Json
@@ -68,10 +68,10 @@ model ideal_type {
 }
 
 model membership {
-  id              String            @id @default(cuid())
+  id              String            @id @default(uuid())
   user_id         String            @unique
-  type            membership_type
-  status          membership_status
+  type            String?
+  status          String?
   start_date      DateTime
   end_date        DateTime
   payment_history Json[]
@@ -81,9 +81,9 @@ model membership {
 }
 
 model verification {
-  id              String              @id @default(cuid())
+  id              String              @id @default(uuid())
   user_id         String              @unique
-  type            verification_type
+  type            String?
   email           String?
   business_number String?
   description     String?
@@ -92,34 +92,8 @@ model verification {
   verification_code String? 
   expires_at       DateTime?
   attempts         Int       @default(0)
-  status          verification_status @default(PENDING)
+  status          String? @default("PENDING")
   created_at      DateTime            @default(now())
   updated_at      DateTime            @updatedAt
   user            users               @relation(fields: [user_id], references: [id])
-}
-
-enum membership_type {
-  BASIC
-  PREMIUM
-  VIP
-}
-
-enum membership_status {
-  ACTIVE
-  EXPIRED
-  CANCELLED
-}
-
-enum verification_type {
-  COMPANY_EMAIL
-  COMPANY_CARD
-  BUSINESS
-  FREELANCER
-  OTHER
-}
-
-enum verification_status {
-  PENDING
-  APPROVED
-  REJECTED
 }
