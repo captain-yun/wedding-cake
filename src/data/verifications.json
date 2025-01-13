@@ -1,0 +1,15 @@
+{
+  "verifications": [
+    {
+      "id": 1,
+      "memberId": 1,
+      "type": "COMPANY_EMAIL",
+      "email": "test@example.com",
+      "verification_code": "123456",
+      "expires_at": "2024-03-20T00:10:00.000Z",
+      "attempts": 1,
+      "status": "PENDING",
+      "createdAt": "2024-03-20T00:00:00.000Z"
+    }
+  ]
+} 

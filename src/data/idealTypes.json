@@ -1,0 +1,31 @@
+{
+  "idealTypes": [
+    {
+      "id": "1",
+      "userId": "1",
+      "ageRange": {
+        "min": 25,
+        "max": 35
+      },
+      "heightRange": {
+        "min": 160,
+        "max": 175
+      },
+      "education": ["UNIVERSITY", "GRADUATE"],
+      "location": ["SEOUL", "GYEONGGI"],
+      "occupation": ["IT", "EDUCATION", "MEDICAL"],
+      "bodyType": ["SLIM", "AVERAGE"],
+      "smoking": "NEVER",
+      "drinking": ["NEVER", "SOCIAL"],
+      "religion": ["NONE", "CHRISTIAN"],
+      "marriageHistory": "NEVER_MARRIED",
+      "childPlan": ["WANT_CHILDREN"],
+      "personality": ["책임감", "성실함", "긍정적"],
+      "lifestyle": ["활동적", "가정적"],
+      "hobbies": ["여행", "운동", "문화생활"],
+      "dateStyle": ["대화", "취미공유", "문화생활"],
+      "createdAt": "2024-03-20T09:00:00",
+      "updatedAt": "2024-03-20T09:00:00"
+    }
+  ]
+} 

@@ -1,0 +1,33 @@
+{
+  "profiles": [
+    {
+      "id": "1",
+      "userId": "1",
+      "birthdate": {
+        "year": 1990,
+        "month": 3,
+        "day": 15
+      },
+      "gender": "MALE",
+      "education": "UNIVERSITY",
+      "marriageHistory": "NEVER_MARRIED",
+      "location": "SEOUL",
+      "occupation": {
+        "category": "IT",
+        "jobTitle": "개발자"
+      },
+      "height": 178,
+      "bodyType": "AVERAGE",
+      "smoking": "NEVER",
+      "drinking": "SOCIAL",
+      "religion": "NONE",
+      "marriagePlan": "WITHIN_1_YEAR",
+      "childPlan": "WANT_CHILDREN",
+      "mbti": "ENFJ",
+      "hobbies": ["여행", "독서", "요리"],
+      "interests": ["문화생활", "자기계발"],
+      "createdAt": "2024-03-20T09:00:00",
+      "updatedAt": "2024-03-20T09:00:00"
+    }
+  ]
+} 
