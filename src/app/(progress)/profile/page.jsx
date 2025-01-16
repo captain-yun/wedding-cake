@@ -53,11 +53,55 @@ export default function ProfilePage() {
       router.push('/login');
       return;
     }
-    // 프로필 작성을 처음 시작할 때 첫 번째 단계로 설정
-    if (!currentProfileStep) {
-      setCurrentProfileStep(1);
+
+    const loadSavedProfile = async () => {
+      try {
+        const response = await fetch('/api/profiles');
+        const data = await response.json();
+        
+        if (data.success && data.profile) {
+          // 저장된 데이터가 있으면 복원
+          useSignupStore.setState({ formData: data.profile.temp_data });
+          setCurrentProfileStep(data.profile.current_step || 1);
+        } else {
+          setCurrentProfileStep(1);
+        }
+      } catch (error) {
+        console.error('프로필 불러오기 실패:', error);
+        setCurrentProfileStep(1);
+      }
+    };
+
+    loadSavedProfile();
+  }, [user, router]);
+
+  // 스텝 변경 전 저장을 위한 공통 함수
+  const handleStepChange = async (newStep) => {
+    try {
+      await fetch('/api/profiles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          formData,
+          currentStep: currentProfileStep
+        })
+      });
+      
+      // 스텝 변경
+      setCurrentProfileStep(newStep);
+    } catch (error) {
+      console.error('프로필 저장 실패:', error);
+      // 에러가 발생해도 사용자 경험을 위해 스텝은 변경
+      setCurrentProfileStep(newStep);
     }
-  }, [user, router, currentProfileStep, setCurrentProfileStep]);
+  };
+
+  // ProfileProgress에 전달할 핸들러
+  const handleStepClick = async (step) => {
+    if (step !== currentProfileStep) {
+      await handleStepChange(step);
+    }
+  };
 
   // 모든 필수 항목이 작성되었는지 확인
   const isProfileComplete = () => {
@@ -84,14 +128,30 @@ export default function ProfilePage() {
     });
   };
 
+  // 기존 handleNext 수정
   const handleNext = async () => {
     if (currentProfileStep < Object.keys(PROFILE_STEPS).length) {
-      setCurrentProfileStep(currentProfileStep + 1);
+      await handleStepChange(currentProfileStep + 1);
     } else if (isProfileComplete()) {
-      // 모든 항목이 완료되었을 때만 다음 단계로 진행
-      completeStep(2);
-      setCurrentStep(3);
-      router.push('/ideal-type');
+      try {
+        const response = await fetch('/api/profiles', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ formData })
+        });
+
+        const data = await response.json();
+        if (!data.success) {
+          throw new Error(data.error);
+        }
+
+        completeStep(2);
+        setCurrentStep(3);
+        router.push('/ideal-type');
+      } catch (error) {
+        console.error('프로필 저장 실패:', error);
+        alert('프로필 저장에 실패했습니다. 다시 시도해주세요.');
+      }
     } else {
       // 어떤 항목이 미완성인지 확인하기 위한 디버깅 코드 추가
       const incomplete = Object.keys(PROFILE_STEPS).filter(step => {
@@ -107,9 +167,10 @@ export default function ProfilePage() {
     }
   };
 
-  const handlePrevious = () => {
+  // handlePrevious도 수정
+  const handlePrevious = async () => {
     if (currentProfileStep > 1) {
-      setCurrentProfileStep(currentProfileStep - 1);
+      await handleStepChange(currentProfileStep - 1);
     }
   };
 
@@ -126,7 +187,10 @@ export default function ProfilePage() {
         </p>
       </div>
 
-      <ProfileProgress />
+      <ProfileProgress 
+        currentStep={currentProfileStep}
+        onStepClick={handleStepClick}
+      />
       
       <CurrentStepComponent onComplete={handleNext} />
 

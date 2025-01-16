@@ -1,6 +1,7 @@
 import formData from 'form-data';
 import Mailgun from 'mailgun.js';
 import { NextResponse } from 'next/server';
+import { jsonDb } from '@/lib/jsonDb';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 

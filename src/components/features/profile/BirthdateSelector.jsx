@@ -11,7 +11,7 @@ export default function BirthdateSelector() {
   const { formData, setFormData } = useSignupStore();
 
   useEffect(() => {
-    if (!formData.birthdate.year) {
+    if (!formData.birthdate?.year) {
       setFormData({
         birthdate: {
           year: '1990',
@@ -40,7 +40,7 @@ export default function BirthdateSelector() {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">년도</label>
           <select
-            value={formData.birthdate.year}
+            value={formData.birthdate?.year}
             onChange={(e) => handleDateChange('year', e.target.value)}
             className="w-full p-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
           >
@@ -54,7 +54,7 @@ export default function BirthdateSelector() {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">월</label>
           <select
-            value={formData.birthdate.month}
+            value={formData.birthdate?.month}
             onChange={(e) => handleDateChange('month', e.target.value)}
             className="w-full p-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
           >
@@ -68,7 +68,7 @@ export default function BirthdateSelector() {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">일</label>
           <select
-            value={formData.birthdate.day}
+            value={formData.birthdate?.day}
             onChange={(e) => handleDateChange('day', e.target.value)}
             className="w-full p-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
           >
